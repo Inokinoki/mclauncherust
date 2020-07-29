@@ -196,6 +196,17 @@ struct MinecraftVersionInfoArgumentsArrayJson {
     jvm: Vec<StringOrMinecraftVersionInfoArgumentsArrayJVMRulesJson>,
 }
 
+#[derive(Deserialize, Debug)]
+struct MinecraftAssetsObjectJson {
+    hash: String,
+    size: u128,
+}
+
+#[derive(Deserialize, Debug)]
+struct MinecraftAssetsJson {
+    objects: HashMap<String, MinecraftAssetsObjectJson>,
+}
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -209,6 +220,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .json::<MinecraftVersionInfoJson>()
         .await?;
     println!("{:#?}", resp2);
+    let resp3 = reqwest::get("https://launchermeta.mojang.com/v1/packages/96dd0d11c96498cea7d82df597ee27d6b84df182/1.16.json")
+        .await?
+        .json::<MinecraftAssetsJson>()
+        .await?;
     Ok(())
 }
 
