@@ -169,3 +169,14 @@ pub struct MinecraftVersionInfoArgumentsArrayJson {
     pub game: Vec<StringOrMinecraftVersionInfoArgumentsArrayGameRulesJson>,
     pub jvm: Vec<StringOrMinecraftVersionInfoArgumentsArrayJVMRulesJson>,
 }
+
+#[cfg(test)]
+mod tests {
+    mod test_version_constant;
+
+    #[test]
+    fn test_single_version() {
+        let version: crate::download::version::MinecraftVersionInfoJson
+            = serde_json::from_str(test_version_constant::VERSION_TEST_JSON).unwrap();
+    }
+}
