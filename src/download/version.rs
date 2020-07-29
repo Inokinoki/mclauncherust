@@ -27,13 +27,22 @@ pub struct MinecraftVersionInfoLibrariesDownloadsArtifactJson {
 
 #[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoLibrariesDownloadsJson {
-    pub artifact: MinecraftVersionInfoLibrariesDownloadsArtifactJson,
+    pub artifact: Option<MinecraftVersionInfoLibrariesDownloadsArtifactJson>,
+    pub classifiers: Option<HashMap<String, MinecraftVersionInfoLibrariesDownloadsArtifactJson>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct MinecraftVersionInfoLibrariesExtractJson {
+    exclude: Option<Vec<String>>,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoLibrariesJson {
     pub downloads: MinecraftVersionInfoLibrariesDownloadsJson,
     pub name: String,
+    pub extract: Option<MinecraftVersionInfoLibrariesExtractJson>,
+    pub natives: Option<HashMap<String, String>>,
+    pub rules: Option<Vec<MinecraftVersionInfoArgumentsArrayRuleWithOSJson>>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -57,6 +66,8 @@ pub struct MinecraftVersionInfoAssertIndexJson {
     pub url: String,
 }
 
+/*
+// Fix missing client_mappings
 #[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoDownloadsJson {
     pub client: MinecraftVersionInfoDownloadsFileJson,
@@ -64,16 +75,17 @@ pub struct MinecraftVersionInfoDownloadsJson {
     pub server: MinecraftVersionInfoDownloadsFileJson,
     pub server_mappings: MinecraftVersionInfoDownloadsFileJson,
 }
+*/
 
 #[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoJson {
-    pub arguments: MinecraftVersionInfoArgumentsArrayJson,
+    pub arguments: Option<MinecraftVersionInfoArgumentsArrayJson>,
     pub assetIndex: MinecraftVersionInfoAssertIndexJson,
     pub assets: String,
-    pub downloads: MinecraftVersionInfoDownloadsJson,
+    pub downloads: HashMap<String, MinecraftVersionInfoDownloadsFileJson>,
     pub id: String,
     pub libraries: Vec<MinecraftVersionInfoLibrariesJson>,
-    pub logging: MinecraftVersionInfoLoggingJson,
+    pub logging: Option<MinecraftVersionInfoLoggingJson>,
     pub mainClass: String,
     pub minimumLauncherVersion: u64,
     pub releaseTime: String,
@@ -115,7 +127,7 @@ pub enum MinecraftVersionInfoArgumentsArrayRuleOSJson {
 #[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoArgumentsArrayRuleWithOSJson {
     pub action: String,
-    pub os: MinecraftVersionInfoArgumentsArrayRuleOSJson,
+    pub os: Option<MinecraftVersionInfoArgumentsArrayRuleOSJson>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -178,5 +190,28 @@ mod tests {
     fn test_single_version() {
         let version: crate::download::version::MinecraftVersionInfoJson
             = serde_json::from_str(test_version_constant::VERSION_TEST_JSON).unwrap();
+    }
+
+    #[test]
+    #[ignore]
+    fn test_all_versions() {
+        let start = 0;
+        let mut counter = start + 1;
+
+        let version_list_response = reqwest::blocking::get(crate::launcher_config::URL_JSON_VERSION_LIST_INOKI)
+            .unwrap().json::<crate::download::version_list::MinecraftVersionListJson>().unwrap();
+
+        for version in version_list_response.versions[start..].iter() {
+            println!("{}. Testing {}", counter, &version.url);
+            let version_response = reqwest::blocking::get(&version.url)
+                .unwrap().json::<crate::download::version::MinecraftVersionInfoJson>().unwrap();
+            counter = counter + 1;
+        }
+        
+        /*
+        // Uncomment this if you want to test a single case
+        let version_response = reqwest::blocking::get("https://launchermeta.mojang.com/v1/packages/551af51dcb3c047908f4a175233436f32b56b1c7/14w27b.json")
+                .unwrap().json::<crate::download::version::MinecraftVersionInfoJson>().unwrap();
+        */
     }
 }
