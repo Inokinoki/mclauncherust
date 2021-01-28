@@ -128,6 +128,24 @@ impl TUIApp {
                             .await?;
                         self.state.version_list = Some(resp);
                     }
+                    KeyCode::Char("s") => {
+                        // Start
+                    }
+                    KeyCode::Char("d") => {
+                        // Download
+                    }
+                    KeyCode::Char("p") => {
+                        // Print launch command
+                    }
+                    KeyCode::Tab => {
+                        // Change focused panel
+                    }
+                    KeyCode::Up => {
+                        // Change focus up
+                    }
+                    KeyCode::Down => {
+                        // Change focus down
+                    }
                     _ => {}
                 },
                 Event::Tick => {
