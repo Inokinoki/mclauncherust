@@ -21,11 +21,18 @@ use std::{
 
 use crate::tuiapp::ui;
 
+use crate::launcher_config;
+use crate::download::version_list::MinecraftVersionListJson;
+
 use argh::FromArgs;
 
 enum Event<I> {
     Input(I),
     Tick,
+}
+
+enum StateEvent {
+    State(TUIAppState),
 }
 
 /// Crossterm demo
@@ -39,15 +46,9 @@ struct Cli {
     enhanced_graphics: bool,
 }
 
-#[derive(Debug, Copy)]
+#[derive(Debug)]
 pub struct TUIAppState {
-
-}
-
-impl Clone for TUIAppState {
-    fn clone(&self) -> Self {
-        *self
-    }
+    pub version_list: Option<MinecraftVersionListJson>,
 }
 
 pub struct TUIApp {
@@ -62,6 +63,7 @@ pub struct TUIApp {
 impl TUIAppState {
     pub fn new() -> TUIAppState {
         TUIAppState {
+            version_list: None
         }
     }
 }
@@ -82,7 +84,7 @@ impl TUIApp {
         app
     }
     
-    pub fn main_loop(&mut self) {
+    pub async fn main_loop(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         // Setup input handling
         let (tx, rx) = mpsc::channel();
 
@@ -109,24 +111,45 @@ impl TUIApp {
         self.terminal.clear();
 
         loop {
-            let state = self.state;
-            self.terminal.draw(|f| ui::draw(f, state));
+            {
+                let state = &mut self.state;
+                self.terminal.draw(|f| ui::draw(f, state));
+            }
             match rx.recv().unwrap() {
                 Event::Input(event) => match event.code {
                     KeyCode::Char('q') => {
                         self.should_quit = true;
                         break;
                     }
+                    KeyCode::Char('r') => {
+                        let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
+                            .await?
+                            .json::<MinecraftVersionListJson>()
+                            .await?;
+                        self.state.version_list = Some(resp);
+                    }
                     _ => {}
                 },
                 Event::Tick => {
                     // println!("tick");
-                }
+                },
+                _ => {
+                    match state_rx.recv().unwrap() {
+                        StateEvent::State(state) => {
+                            
+                        },
+                        _ => {
+                            // We do not handle the other event
+                        }
+                    }
+                },
             }
             if self.should_quit {
                 break;
             }
         }
+
+        Ok(())
     }
 }
 

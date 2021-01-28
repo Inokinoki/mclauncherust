@@ -15,7 +15,7 @@ use tui::{
     Frame,
 };
 
-pub fn draw<B: Backend>(f: &mut Frame<B>, s: TUIAppState) {
+pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     let size = f.size();
     let block = Block::default()
         .title("MC Launcherust - [S]tart [D]ownload [P]rint [R]efresh [Q]uit")
@@ -36,43 +36,53 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: TUIAppState) {
     let installed_version_block = Block::default()
         .borders(Borders::ALL)
         .title(Span::styled("Installed", Style::default().fg(Color::Green)));
-    let all_version_block = Block::default().title("All")
-        .borders(Borders::ALL);
-    // Iterate through all elements in the `items` app and append some debug text to it.
-    let mut statefulItems = StatefulList::with_items(vec![
-        "Item0",
-        "Item1",
-        "Item2",
-        "Item3",
-    ]);
-    let items: Vec<ListItem> = statefulItems
-        .items
-        .iter()
-        .map(|i| {
-            /*
-            for _ in 0..i.1 {
-                lines.push(Spans::from(Span::styled(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                    Style::default().add_modifier(Modifier::ITALIC),
-                )));
-            }
-            */
-            ListItem::new(Spans::from(String::from(*i)))
-        })
-        .collect();
 
-    // Create a List from all list items and highlight the currently selected one
-    let items = List::new(items)
-        .block(all_version_block)
-        .highlight_style(
-            Style::default()
-                .bg(Color::LightGreen)
-                .add_modifier(Modifier::BOLD),
-        )
-        .highlight_symbol(">> ");
+    match &s.version_list {
+        Some(list) => {
+            let all_version_block = Block::default().title("All")
+                .borders(Borders::ALL);
 
-    // We can now render the item list
-    f.render_stateful_widget(items, version_chunks[1], &mut statefulItems.state);
+            // Iterate through all elements in the `items` app and append some debug text to it.
+            let mut statefulItems = StatefulList::with_items(list.versions.to_vec());
+            let items: Vec<ListItem> = statefulItems
+                .items
+                .iter()
+                .map(|i| {
+                    ListItem::new(Spans::from(String::from(i.id.clone())))
+                })
+                .collect();
+            // Create a List from all list items and highlight the currently selected one
+            let items = List::new(items)
+            .block(all_version_block)
+            .highlight_style(
+                Style::default()
+                    .bg(Color::LightGreen)
+                    .add_modifier(Modifier::BOLD),
+            )
+            .highlight_symbol(">> ");
+
+            // We can now render the item list
+            f.render_stateful_widget(items, version_chunks[1], &mut statefulItems.state);
+        }
+        None => {
+            /* Failed to load available versions */
+            let all_version_block = Block::default()
+                .title(Span::styled("All", Style::default().fg(Color::Red)))
+                .borders(Borders::ALL);
+            let text = vec![
+                Spans::from(
+                    Span::styled("No available version, please check your network",
+                        Style::default().fg(Color::Red))
+                ),
+                Spans::from("press [R] to refresh"),
+            ];
+            let version_not_loaded_paragraph = Paragraph::new(text.clone())
+                .block(all_version_block)
+                .alignment(Alignment::Center);
+            
+            f.render_widget(version_not_loaded_paragraph, version_chunks[1]);
+        }
+    }
 
     f.render_widget(installed_version_block, version_chunks[0]);
     // f.render_widget(all_version_block, version_chunks[1]);

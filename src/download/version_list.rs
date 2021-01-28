@@ -16,6 +16,18 @@ pub struct MinecraftVersionListJson {
     pub versions: Vec<MinecraftVersionJson>,
 }
 
+impl Clone for MinecraftVersionJson {
+    fn clone(&self) -> Self {
+        MinecraftVersionJson {
+            r#type: self.r#type.clone(),
+            time: self.time.clone(),
+            url: self.url.clone(),
+            releaseTime: self.releaseTime.clone(),
+            id: self.id.clone()
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     const VERSION_LIST_TEST_JSON: &str =

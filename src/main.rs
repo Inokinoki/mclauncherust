@@ -12,7 +12,7 @@ mod tuiapp;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut app = tuiapp::app::TUIApp::new();
-    app.main_loop();
+    app.main_loop().await?;
 
     /*
     let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
