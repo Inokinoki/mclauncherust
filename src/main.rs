@@ -6,10 +6,15 @@ use std::collections::HashMap;
 // named `launcher_config` under this scope
 mod launcher_config;
 mod download;
+mod tuiapp;
 
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut app = tuiapp::app::TUIApp::new();
+    app.main_loop();
+
+    /*
     let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
         .await?
         .json::<download::version_list::MinecraftVersionListJson>()
@@ -24,6 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .json::<download::assets::MinecraftAssetsJson>()
         .await?;
+    */
     Ok(())
 }
 
