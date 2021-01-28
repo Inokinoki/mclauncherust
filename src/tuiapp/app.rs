@@ -24,6 +24,8 @@ use crate::tuiapp::ui;
 use crate::launcher_config;
 use crate::download::version_list::MinecraftVersionListJson;
 
+use crate::tuiapp::{ Focus };
+
 use argh::FromArgs;
 
 enum Event<I> {
@@ -49,6 +51,7 @@ struct Cli {
 #[derive(Debug)]
 pub struct TUIAppState {
     pub version_list: Option<MinecraftVersionListJson>,
+    pub focused: Focus,
 }
 
 pub struct TUIApp {
@@ -63,7 +66,8 @@ pub struct TUIApp {
 impl TUIAppState {
     pub fn new() -> TUIAppState {
         TUIAppState {
-            version_list: None
+            version_list: None,
+            focused: Focus::INSTALLED_VERSION_LIST,
         }
     }
 }
@@ -128,17 +132,31 @@ impl TUIApp {
                             .await?;
                         self.state.version_list = Some(resp);
                     }
-                    KeyCode::Char("s") => {
+                    KeyCode::Char('s') => {
                         // Start
                     }
-                    KeyCode::Char("d") => {
+                    KeyCode::Char('d') => {
                         // Download
                     }
-                    KeyCode::Char("p") => {
+                    KeyCode::Char('p') => {
                         // Print launch command
                     }
                     KeyCode::Tab => {
                         // Change focused panel
+                        match self.state.focused {
+                            Focus::INSTALLED_VERSION_LIST => {
+                                self.state.focused = Focus::ALL_VERSION_LIST;
+                            }
+                            Focus::ALL_VERSION_LIST => {
+                                self.state.focused = Focus::STATUS_LIST;
+                            }
+                            Focus::STATUS_LIST => {
+                                self.state.focused = Focus::INSTALLED_VERSION_LIST;
+                            }
+                            _ => {
+                                self.state.focused = Focus::ALL_VERSION_LIST;
+                            }
+                        }
                     }
                     KeyCode::Up => {
                         // Change focus up
@@ -152,14 +170,6 @@ impl TUIApp {
                     // println!("tick");
                 },
                 _ => {
-                    match state_rx.recv().unwrap() {
-                        StateEvent::State(state) => {
-                            
-                        },
-                        _ => {
-                            // We do not handle the other event
-                        }
-                    }
                 },
             }
             if self.should_quit {
