@@ -19,6 +19,8 @@ use std::{
     io,
 };
 
+use crate::tuiapp::ui;
+
 use argh::FromArgs;
 
 enum Event<I> {
@@ -37,11 +39,31 @@ struct Cli {
     enhanced_graphics: bool,
 }
 
+#[derive(Debug, Copy)]
+pub struct TUIAppState {
+
+}
+
+impl Clone for TUIAppState {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
 pub struct TUIApp {
     should_quit: bool,
 
+    state: TUIAppState,
+
     cli: Cli,
     terminal: Terminal<CrosstermBackend<io::Stdout>>,
+}
+
+impl TUIAppState {
+    pub fn new() -> TUIAppState {
+        TUIAppState {
+        }
+    }
 }
 
 impl TUIApp {
@@ -52,6 +74,8 @@ impl TUIApp {
         let app = TUIApp {
             cli: argh::from_env(),
             terminal: Terminal::new(backend).unwrap(),
+
+            state: TUIAppState::new(),
 
             should_quit: false,
         };
@@ -82,7 +106,11 @@ impl TUIApp {
             }
         });
 
+        self.terminal.clear();
+
         loop {
+            let state = self.state;
+            self.terminal.draw(|f| ui::draw(f, state));
             match rx.recv().unwrap() {
                 Event::Input(event) => match event.code {
                     KeyCode::Char('q') => {
@@ -92,7 +120,7 @@ impl TUIApp {
                     _ => {}
                 },
                 Event::Tick => {
-                    println!("tick");
+                    // println!("tick");
                 }
             }
             if self.should_quit {
