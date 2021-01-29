@@ -39,6 +39,15 @@ enum StateEvent {
     State(TUIAppState),
 }
 
+/* TODO: move it somewhere */
+#[derive(Debug)]
+pub struct MinecraftVersion {
+    pub id: String,
+    pub path: String,
+    pub has_json: bool,
+    pub has_jar: bool,
+}
+
 /// Crossterm demo
 #[derive(Debug, FromArgs)]
 struct Cli {
@@ -58,6 +67,7 @@ pub struct TUIAppState {
     pub selected_version_id_in_installed_list: String,
 
     pub stateful_items: Option<StatefulList<MinecraftVersionJson>>,
+    pub installed_items: Option<StatefulList<MinecraftVersion>>,
 }
 
 pub struct TUIApp {
@@ -77,6 +87,7 @@ impl TUIAppState {
             selected_version_id_in_installed_list: String::new(),
 
             stateful_items: None,
+            installed_items: None,
         }
     }
 
@@ -88,13 +99,42 @@ impl TUIAppState {
                 selected_version_id_in_installed_list: String::new(),
     
                 stateful_items: None,
+                installed_items: None,
             }
         }
         
         let versions_folder_path: PathBuf = path.join("versions");
+
+        if !versions_folder_path.exists() || !versions_folder_path.is_dir() {
+            return TUIAppState {
+                focused: Focus::INSTALLED_VERSION_LIST,
+                selected_version_id_in_all_list: String::new(),
+                selected_version_id_in_installed_list: String::new(),
+    
+                stateful_items: None,
+                installed_items: None,
+            }
+        }
+
+        // Load installed versions
+        let mut installed_versions = Vec::new();
+        {
+            for entry in fs::read_dir(&versions_folder_path).unwrap() {
+                let entry = entry.unwrap();
+                let path = entry.path();
+                if path.is_dir() {
+                    installed_versions.push(MinecraftVersion {
+                        id: path.file_name().unwrap().to_str().unwrap().to_string(),
+                        path: path.to_str().unwrap().to_string(),
+                        has_json: false,
+                        has_jar: false,
+                    });
+                }
+            }
+        }
+
         let mut manifest_file_path = versions_folder_path;
         manifest_file_path.push("version_manifest_v2.json");
-
 
         if !manifest_file_path.exists() || !manifest_file_path.is_file() {
             return TUIAppState {
@@ -103,6 +143,7 @@ impl TUIAppState {
                 selected_version_id_in_installed_list: String::new(),
     
                 stateful_items: None,
+                installed_items: Some(StatefulList::with_items(installed_versions)),
             }
         }
 
@@ -117,6 +158,7 @@ impl TUIAppState {
             selected_version_id_in_installed_list: String::new(),
 
             stateful_items: Some(StatefulList::with_items(version_list.versions)),
+            installed_items: Some(StatefulList::with_items(installed_versions)),
         }
     }
 }
@@ -130,8 +172,8 @@ impl TUIApp {
             cli: argh::from_env(),
             terminal: Terminal::new(backend).unwrap(),
 
-            // state: TUIAppState::create_with_mc_path(Path::new("C:\\Users\\veyxs\\AppData\\Roaming\\.minecraft")),
-            state: TUIAppState::new(),
+            state: TUIAppState::create_with_mc_path(Path::new("C:\\Users\\veyxs\\AppData\\Roaming\\.minecraft")),
+            // state: TUIAppState::new(),
 
             should_quit: false,
         };
@@ -214,6 +256,12 @@ impl TUIApp {
                         // Change focus up
                         match self.state.focused {
                             Focus::INSTALLED_VERSION_LIST => {
+                                match &mut self.state.installed_items {
+                                    Some(list) => {
+                                        list.previous();
+                                    }
+                                    None => {}
+                                }
                             }
                             Focus::ALL_VERSION_LIST => {
                                 match &mut self.state.stateful_items {
@@ -233,6 +281,12 @@ impl TUIApp {
                         // Change focus down
                         match self.state.focused {
                             Focus::INSTALLED_VERSION_LIST => {
+                                match &mut self.state.installed_items {
+                                    Some(list) => {
+                                        list.next();
+                                    }
+                                    None => {}
+                                }
                             }
                             Focus::ALL_VERSION_LIST => {
                                 match &mut self.state.stateful_items {

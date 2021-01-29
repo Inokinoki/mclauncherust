@@ -35,21 +35,73 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
         .margin(1)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(chunks[0]);
-    
-    match s.focused {
-        Focus::INSTALLED_VERSION_LIST => {
-            let installed_version_block = Block::default()
-                .borders(Borders::ALL)
-                .title(Span::styled("Installed", Style::default().fg(Color::Green)));
-            f.render_widget(installed_version_block, version_chunks[0]);
+    match &mut s.installed_items {
+        Some(list) => {
+            // Iterate through all elements in the `items` app and append some debug text to it.
+            let items: Vec<ListItem> = list
+                .items   
+                .iter()
+                .map(|i| {
+                    ListItem::new(Spans::from(String::from(i.id.clone())))
+                })
+                .collect();
+            
+            match s.focused {
+                Focus::INSTALLED_VERSION_LIST => {
+                    let installed_version_block = Block::default()
+                        .borders(Borders::ALL)
+                        .title(Span::styled("Installed", Style::default().fg(Color::Green)));
+                    // Create a List from installed list items and highlight the currently selected one
+                    let items = List::new(items)
+                        .block(installed_version_block)
+                        .highlight_style(
+                            Style::default()
+                                .bg(Color::LightGreen)
+                                .add_modifier(Modifier::BOLD),
+                        )
+                        .highlight_symbol(">> ");
+                    // We can now render the item list
+                    f.render_stateful_widget(items, version_chunks[0], &mut list.state);
+                }
+                _ => {
+                    let installed_version_block = Block::default()
+                        .borders(Borders::ALL)
+                        .title("Installed");
+                    // Create a List from installed list items and highlight the currently selected one
+                    let items = List::new(items)
+                        .block(installed_version_block)
+                        .highlight_style(
+                            Style::default()
+                                .bg(Color::LightGreen)
+                                .add_modifier(Modifier::BOLD),
+                        )
+                        .highlight_symbol(">> ");
+                    // We can now render the item list
+                    f.render_stateful_widget(items, version_chunks[0], &mut list.state);
+                }
+            }
         }
-        _ => {
-            let installed_version_block = Block::default()
-                .borders(Borders::ALL)
-                .title("Installed");
-            f.render_widget(installed_version_block, version_chunks[0]);
+        None => {
+            /* Failed to load available versions */
+            s.focused = Focus::ALL_VERSION_LIST;    // Force to focus here
+            let all_version_block = Block::default()
+                .title(Span::styled("All", Style::default().fg(Color::Red)))
+                .borders(Borders::ALL);
+            let text = vec![
+                Spans::from(
+                    Span::styled("No available version, please check your network",
+                        Style::default().fg(Color::Red))
+                ),
+                Spans::from("press [R] to refresh"),
+            ];
+            let version_not_loaded_paragraph = Paragraph::new(text.clone())
+                .block(all_version_block)
+                .alignment(Alignment::Center);
+            
+            f.render_widget(version_not_loaded_paragraph, version_chunks[1]);
         }
     }
+
 
     match &mut s.stateful_items {
         Some(list) => {
