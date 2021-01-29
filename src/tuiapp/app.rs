@@ -227,8 +227,18 @@ impl TUIApp {
                     KeyCode::Char('s') => {
                         // Start
                     }
+                    KeyCode::Char('c') => {
+                        // Cancel download
+                        match self.state.focused {
+                            Focus::DOWNLOAD_PAGE => {
+                                self.state.focused = Focus::ALL_VERSION_LIST;
+                            }
+                            _ => {}
+                        }
+                    }
                     KeyCode::Char('d') => {
                         // Download
+                        self.state.focused = Focus::DOWNLOAD_PAGE;
                     }
                     KeyCode::Char('p') => {
                         // Print launch command
