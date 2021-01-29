@@ -131,6 +131,44 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                 .borders(Borders::ALL);
             f.render_widget(block, status_chunks[0]);
         }
+        Focus::ALL_VERSION_LIST => {
+            // Display choosed info in all version list
+            match &s.stateful_items {
+                Some(list) => {
+                    match list.state.selected() {
+                        Some(i) => {
+                            let item = list.items.get(i).unwrap();
+                            let text = vec![
+                                Spans::from(format!("ID: {}", item.id)),
+                                Spans::from(format!("Type: {}", item.r#type)),
+                                Spans::from(format!("URL: {}", item.url)),
+                                Spans::from(format!("Release Time: {}", item.releaseTime)),
+                                Spans::from(format!("Installed: {}", "No")),
+                            ];
+                            let block = Block::default()
+                                .title("Status")
+                                .borders(Borders::ALL);
+                            let paragraph = Paragraph::new(text.clone())
+                                .block(block)
+                                .alignment(Alignment::Left);
+                            f.render_widget(paragraph, status_chunks[0]);
+                        }
+                        None => {
+                            let block = Block::default()
+                                .title("Status")
+                                .borders(Borders::ALL);
+                            f.render_widget(block, status_chunks[0]);
+                        }
+                    }
+                }
+                None => {
+                    let block = Block::default()
+                        .title("Status")
+                        .borders(Borders::ALL);
+                    f.render_widget(block, status_chunks[0]);
+                }
+            }
+        }
         _ => {
             let block = Block::default()
                 .title("Status")
