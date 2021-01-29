@@ -17,7 +17,9 @@ use std::{
     thread,
     time::{Duration, Instant},
     io,
+    fs,
 };
+use std::path::{ Path, PathBuf };
 
 use crate::tuiapp::ui;
 
@@ -77,6 +79,46 @@ impl TUIAppState {
             stateful_items: None,
         }
     }
+
+    pub fn create_with_mc_path(path: &Path) -> TUIAppState {
+        if !path.exists() || !path.is_dir() {
+            return TUIAppState {
+                focused: Focus::INSTALLED_VERSION_LIST,
+                selected_version_id_in_all_list: String::new(),
+                selected_version_id_in_installed_list: String::new(),
+    
+                stateful_items: None,
+            }
+        }
+        
+        let versions_folder_path: PathBuf = path.join("versions");
+        let mut manifest_file_path = versions_folder_path;
+        manifest_file_path.push("version_manifest_v2.json");
+
+
+        if !manifest_file_path.exists() || !manifest_file_path.is_file() {
+            return TUIAppState {
+                focused: Focus::INSTALLED_VERSION_LIST,
+                selected_version_id_in_all_list: String::new(),
+                selected_version_id_in_installed_list: String::new(),
+    
+                stateful_items: None,
+            }
+        }
+
+        let contents = fs::read_to_string(manifest_file_path)
+            .expect("Something went wrong reading the file");
+        let version_list: crate::download::version_list::MinecraftVersionListJson
+            = serde_json::from_str(&contents).unwrap();
+
+        TUIAppState {
+            focused: Focus::INSTALLED_VERSION_LIST,
+            selected_version_id_in_all_list: String::new(),
+            selected_version_id_in_installed_list: String::new(),
+
+            stateful_items: Some(StatefulList::with_items(version_list.versions)),
+        }
+    }
 }
 
 impl TUIApp {
@@ -88,6 +130,7 @@ impl TUIApp {
             cli: argh::from_env(),
             terminal: Terminal::new(backend).unwrap(),
 
+            // state: TUIAppState::create_with_mc_path(Path::new("C:\\Users\\veyxs\\AppData\\Roaming\\.minecraft")),
             state: TUIAppState::new(),
 
             should_quit: false,
