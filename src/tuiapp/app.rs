@@ -28,6 +28,8 @@ use crate::download::version_list::{ MinecraftVersionListJson, MinecraftVersionJ
 
 use crate::tuiapp::{ Focus };
 
+use crate::loader::{ MinecraftVersion, MinecraftInstance };
+
 use argh::FromArgs;
 
 enum Event<I> {
@@ -39,14 +41,6 @@ enum StateEvent {
     State(TUIAppState),
 }
 
-/* TODO: move it somewhere */
-#[derive(Debug)]
-pub struct MinecraftVersion {
-    pub id: String,
-    pub path: String,
-    pub has_json: bool,
-    pub has_jar: bool,
-}
 
 /// Crossterm demo
 #[derive(Debug, FromArgs)]

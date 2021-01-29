@@ -7,6 +7,7 @@ use std::collections::HashMap;
 mod launcher_config;
 mod download;
 mod tuiapp;
+mod loader;
 
 
 #[tokio::main]
