@@ -62,6 +62,8 @@ pub struct TUIAppState {
 
     pub stateful_items: Option<StatefulList<MinecraftVersionJson>>,
     pub installed_items: Option<StatefulList<MinecraftVersion>>,
+
+    pub instance: MinecraftInstance,
 }
 
 pub struct TUIApp {
@@ -82,6 +84,8 @@ impl TUIAppState {
 
             stateful_items: None,
             installed_items: None,
+
+            instance: MinecraftInstance::new(),
         }
     }
 
@@ -94,8 +98,12 @@ impl TUIAppState {
     
                 stateful_items: None,
                 installed_items: None,
+
+                instance: MinecraftInstance::from(path.to_str().unwrap_or_else(|| { "" })),
             }
         }
+
+        let mut instance = MinecraftInstance::from(path.to_str().unwrap_or_else(|| { "" }));
         
         let versions_folder_path: PathBuf = path.join("versions");
 
@@ -107,25 +115,13 @@ impl TUIAppState {
     
                 stateful_items: None,
                 installed_items: None,
+
+                instance: instance,
             }
         }
 
         // Load installed versions
-        let mut installed_versions = Vec::new();
-        {
-            for entry in fs::read_dir(&versions_folder_path).unwrap() {
-                let entry = entry.unwrap();
-                let path = entry.path();
-                if path.is_dir() {
-                    installed_versions.push(MinecraftVersion {
-                        id: path.file_name().unwrap().to_str().unwrap().to_string(),
-                        path: path.to_str().unwrap().to_string(),
-                        has_json: false,
-                        has_jar: false,
-                    });
-                }
-            }
-        }
+        let mut installed_versions = instance.existing_versions();
 
         let mut manifest_file_path = versions_folder_path;
         manifest_file_path.push("version_manifest_v2.json");
@@ -138,6 +134,8 @@ impl TUIAppState {
     
                 stateful_items: None,
                 installed_items: Some(StatefulList::with_items(installed_versions)),
+
+                instance: instance,
             }
         }
 
@@ -153,6 +151,8 @@ impl TUIAppState {
 
             stateful_items: Some(StatefulList::with_items(version_list.versions)),
             installed_items: Some(StatefulList::with_items(installed_versions)),
+
+            instance: instance,
         }
     }
 }
