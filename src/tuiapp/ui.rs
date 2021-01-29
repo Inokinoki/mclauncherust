@@ -190,12 +190,22 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                     match list.state.selected() {
                         Some(i) => {
                             let item = list.items.get(i).unwrap();
+
+                            let mut is_installed = false;
+                            match &s.installed_items {
+                                Some(items) => {
+                                    let mut iter = items.items.iter();
+                                    is_installed = iter.any(|x| x.id == item.id);
+                                }
+                                None => {}
+                            }
+
                             let text = vec![
                                 Spans::from(format!("ID: {}", item.id)),
                                 Spans::from(format!("Type: {}", item.r#type)),
                                 Spans::from(format!("URL: {}", item.url)),
                                 Spans::from(format!("Release Time: {}", item.releaseTime)),
-                                Spans::from(format!("Installed: {}", "No")),
+                                Spans::from(format!("Installed: {}", if is_installed { "Yes" } else { "No" })),
                             ];
                             let block = Block::default()
                                 .title("Status")
