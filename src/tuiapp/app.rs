@@ -155,7 +155,9 @@ impl TUIApp {
                                 self.state.focused = Focus::ALL_VERSION_LIST;
                             }
                             Focus::ALL_VERSION_LIST => {
-                                self.state.focused = Focus::STATUS_LIST;
+                                // Currently not focus on status list
+                                self.state.focused = Focus::INSTALLED_VERSION_LIST;
+                                // self.state.focused = Focus::STATUS_LIST;
                             }
                             Focus::STATUS_LIST => {
                                 self.state.focused = Focus::INSTALLED_VERSION_LIST;
