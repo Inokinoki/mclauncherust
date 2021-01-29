@@ -20,15 +20,15 @@ use crate::tuiapp::{ Focus };
 pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     match s.focused {
         Focus::DOWNLOAD_PAGE => {
-            drawDonwloadPage(f, s);
+            draw_donwload_page(f, s);
         }
         _ => {
-            drawInfoPage(f, s);
+            draw_info_page(f, s);
         }
     }
 }
 
-fn drawDonwloadPage<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
+fn draw_donwload_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     let size = f.size();
     let block = Block::default()
         .title("MC Launcherust - [[version placeholder]] [R]efresh [C]ancel")
@@ -36,7 +36,7 @@ fn drawDonwloadPage<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     f.render_widget(block, size);
 }
 
-fn drawInfoPage<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
+fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     let size = f.size();
     let block = Block::default()
         .title("MC Launcherust - [S]tart [D]ownload [P]rint [R]efresh [Q]uit")
