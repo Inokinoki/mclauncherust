@@ -106,4 +106,12 @@ impl MinecraftInstance {
     fn create_mods(&self) {
         // TODO
     }
+
+    fn create_version_dir(&self, v: &MinecraftVersion) {
+        if !self.has_versions() {
+            self.create_versions();
+        }
+
+        // TODO: create versions/id
+    }
 }
