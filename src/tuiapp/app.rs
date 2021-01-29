@@ -22,7 +22,7 @@ use std::{
 use crate::tuiapp::ui;
 
 use crate::launcher_config;
-use crate::download::version_list::MinecraftVersionListJson;
+use crate::download::version_list::{ MinecraftVersionListJson, MinecraftVersionJson };
 
 use crate::tuiapp::{ Focus };
 
@@ -50,8 +50,12 @@ struct Cli {
 
 #[derive(Debug)]
 pub struct TUIAppState {
-    pub version_list: Option<MinecraftVersionListJson>,
     pub focused: Focus,
+
+    pub selected_version_id_in_all_list: String,
+    pub selected_version_id_in_installed_list: String,
+
+    pub stateful_items: Option<StatefulList<MinecraftVersionJson>>,
 }
 
 pub struct TUIApp {
@@ -66,8 +70,11 @@ pub struct TUIApp {
 impl TUIAppState {
     pub fn new() -> TUIAppState {
         TUIAppState {
-            version_list: None,
             focused: Focus::INSTALLED_VERSION_LIST,
+            selected_version_id_in_all_list: String::new(),
+            selected_version_id_in_installed_list: String::new(),
+
+            stateful_items: None,
         }
     }
 }
@@ -130,7 +137,7 @@ impl TUIApp {
                             .await?
                             .json::<MinecraftVersionListJson>()
                             .await?;
-                        self.state.version_list = Some(resp);
+                        self.state.stateful_items = Some(StatefulList::with_items(resp.versions));
                     }
                     KeyCode::Char('s') => {
                         // Start
@@ -160,9 +167,41 @@ impl TUIApp {
                     }
                     KeyCode::Up => {
                         // Change focus up
+                        match self.state.focused {
+                            Focus::INSTALLED_VERSION_LIST => {
+                            }
+                            Focus::ALL_VERSION_LIST => {
+                                match &mut self.state.stateful_items {
+                                    Some(list) => {
+                                        list.previous();
+                                    }
+                                    None => {}
+                                }
+                            }
+                            Focus::STATUS_LIST => {
+                            }
+                            _ => {
+                            }
+                        }
                     }
                     KeyCode::Down => {
                         // Change focus down
+                        match self.state.focused {
+                            Focus::INSTALLED_VERSION_LIST => {
+                            }
+                            Focus::ALL_VERSION_LIST => {
+                                match &mut self.state.stateful_items {
+                                    Some(list) => {
+                                        list.next();
+                                    }
+                                    None => {}
+                                }
+                            }
+                            Focus::STATUS_LIST => {
+                            }
+                            _ => {
+                            }
+                        }
                     }
                     _ => {}
                 },
@@ -182,6 +221,7 @@ impl TUIApp {
 }
 
 
+#[derive(Debug)]
 pub struct StatefulList<T> {
     pub state: ListState,
     pub items: Vec<T>,

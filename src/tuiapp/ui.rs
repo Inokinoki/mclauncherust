@@ -51,12 +51,11 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
         }
     }
 
-    match &s.version_list {
+    match &mut s.stateful_items {
         Some(list) => {
             // Iterate through all elements in the `items` app and append some debug text to it.
-            let mut statefulItems = StatefulList::with_items(list.versions.to_vec());
-            let items: Vec<ListItem> = statefulItems
-                .items
+            let items: Vec<ListItem> = list
+                .items   
                 .iter()
                 .map(|i| {
                     ListItem::new(Spans::from(String::from(i.id.clone())))
@@ -78,7 +77,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                         )
                         .highlight_symbol(">> ");
                     // We can now render the item list
-                    f.render_stateful_widget(items, version_chunks[1], &mut statefulItems.state);
+                    f.render_stateful_widget(items, version_chunks[1], &mut list.state);
                 }
                 _ => {
                     let all_version_block = Block::default()
@@ -94,7 +93,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                         )
                         .highlight_symbol(">> ");
                     // We can now render the item list
-                    f.render_stateful_widget(items, version_chunks[1], &mut statefulItems.state);
+                    f.render_stateful_widget(items, version_chunks[1], &mut list.state);
                 }
             }
         }
