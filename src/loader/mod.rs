@@ -4,6 +4,8 @@ use std::{ env, fs };
 use crate::launcher_config;
 use crate::download::version_list::MinecraftVersionListJson;
 
+use tokio::runtime::Runtime;
+
 #[derive(Debug)]
 pub struct MinecraftVersion {
     pub id: String,
@@ -17,18 +19,24 @@ pub struct MinecraftVersion {
 #[derive(Debug)]
 pub struct MinecraftInstance {
     base_path: String,
+
+    runtime: tokio::runtime::Runtime,
 }
 
 impl MinecraftInstance {
     pub fn new() -> MinecraftInstance {
         MinecraftInstance {
             base_path: env::current_dir().unwrap().to_str().unwrap_or_else(|| { "" }).to_string(),
+
+            runtime: Runtime::new().unwrap(),
         }
     }
 
     pub fn from(path: &str) -> MinecraftInstance {
         MinecraftInstance {
             base_path: path.to_string(),
+
+            runtime: Runtime::new().unwrap(),
         }
     }
 
