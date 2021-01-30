@@ -7,6 +7,7 @@ use crate::download::version_list::MinecraftVersionListJson;
 use tokio::runtime::Runtime;
 
 mod manifest_loader;
+mod version_loader;
 
 #[derive(Debug)]
 pub struct MinecraftVersion {
@@ -94,9 +95,14 @@ impl MinecraftInstance {
         Path::new(&self.base_path)
     }
 
-    pub fn download_version(&self, v: &MinecraftVersion) {
+    pub fn download_version(&mut self, v: &MinecraftVersion) {
         if !v.has_json {
-            // TODO: Download JSON
+            // Download JSON
+            // let task = crate::loader::version_loader::download_version_async_impl();
+            // match self.runtime.block_on(task) {
+            //     Ok(version_info) => {}
+            //     Err(e) => {}
+            // }
         }
 
         if !v.has_jar {
