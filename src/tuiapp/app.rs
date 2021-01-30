@@ -60,7 +60,7 @@ pub struct TUIAppState {
     pub selected_version_id_in_all_list: String,
     pub selected_version_id_in_installed_list: String,
 
-    pub stateful_items: Option<StatefulList<MinecraftVersionJson>>,
+    pub manifest_items: Option<StatefulList<MinecraftVersionJson>>,
     pub installed_items: Option<StatefulList<MinecraftVersion>>,
 
     pub instance: MinecraftInstance,
@@ -82,7 +82,7 @@ impl TUIAppState {
             selected_version_id_in_all_list: String::new(),
             selected_version_id_in_installed_list: String::new(),
 
-            stateful_items: None,
+            manifest_items: None,
             installed_items: None,
 
             instance: MinecraftInstance::new(),
@@ -96,7 +96,7 @@ impl TUIAppState {
                 selected_version_id_in_all_list: String::new(),
                 selected_version_id_in_installed_list: String::new(),
     
-                stateful_items: None,
+                manifest_items: None,
                 installed_items: None,
 
                 instance: MinecraftInstance::from(path.to_str().unwrap_or_else(|| { "" })),
@@ -118,7 +118,7 @@ impl TUIAppState {
                 selected_version_id_in_all_list: String::new(),
                 selected_version_id_in_installed_list: String::new(),
     
-                stateful_items: None,
+                manifest_items: None,
                 installed_items: Some(StatefulList::with_items(installed_versions)),
 
                 instance: instance,
@@ -135,7 +135,7 @@ impl TUIAppState {
             selected_version_id_in_all_list: String::new(),
             selected_version_id_in_installed_list: String::new(),
 
-            stateful_items: Some(StatefulList::with_items(version_list.versions)),
+            manifest_items: Some(StatefulList::with_items(version_list.versions)),
             installed_items: Some(StatefulList::with_items(installed_versions)),
 
             instance: instance,
@@ -202,7 +202,7 @@ impl TUIApp {
                             .await?
                             .json::<MinecraftVersionListJson>()
                             .await?;
-                        self.state.stateful_items = Some(StatefulList::with_items(resp.versions));
+                        self.state.manifest_items = Some(StatefulList::with_items(resp.versions));
                     }
                     KeyCode::Char('s') => {
                         // Start
@@ -254,7 +254,7 @@ impl TUIApp {
                                 }
                             }
                             Focus::ALL_VERSION_LIST => {
-                                match &mut self.state.stateful_items {
+                                match &mut self.state.manifest_items {
                                     Some(list) => {
                                         list.previous();
                                     }
@@ -279,7 +279,7 @@ impl TUIApp {
                                 }
                             }
                             Focus::ALL_VERSION_LIST => {
-                                match &mut self.state.stateful_items {
+                                match &mut self.state.manifest_items {
                                     Some(list) => {
                                         list.next();
                                     }

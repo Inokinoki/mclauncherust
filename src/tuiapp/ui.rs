@@ -122,7 +122,7 @@ fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     }
 
 
-    match &mut s.stateful_items {
+    match &mut s.manifest_items {
         Some(list) => {
             // Iterate through all elements in the `items` app and append some debug text to it.
             let items: Vec<ListItem> = list
@@ -204,7 +204,7 @@ fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
         }
         Focus::ALL_VERSION_LIST => {
             // Display choosed info in all version list
-            match &s.stateful_items {
+            match &s.manifest_items {
                 Some(list) => {
                     match list.state.selected() {
                         Some(i) => {
