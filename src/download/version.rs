@@ -95,12 +95,6 @@ pub struct MinecraftVersionInfoJson {
 
 
 #[derive(Deserialize, Debug)]
-pub struct MinecraftVersionInfoArgumentsJson {
-    pub game: MinecraftVersionInfoArgumentsArrayJson,
-    pub jvm: MinecraftVersionInfoArgumentsArrayJson,
-}
-
-#[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoArgumentsArrayRuleOSWithoutVersionJson {
     pub name: String,
 }
@@ -134,13 +128,6 @@ pub struct MinecraftVersionInfoArgumentsArrayRuleWithOSJson {
 pub struct MinecraftVersionInfoArgumentsArrayRuleWithFeaturesJson {
     pub action: String,
     pub features: HashMap<String, bool>,
-}
-
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-pub enum MinecraftVersionInfoArgumentsArrayRuleJson {
-    OS(MinecraftVersionInfoArgumentsArrayRuleWithOSJson),
-    Features(MinecraftVersionInfoArgumentsArrayRuleWithFeaturesJson),
 }
 
 #[derive(Deserialize, Debug)]
