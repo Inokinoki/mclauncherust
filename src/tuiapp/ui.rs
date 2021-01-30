@@ -250,6 +250,45 @@ fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                 }
             }
         }
+        Focus::INSTALLED_VERSION_LIST => {
+            match &s.installed_items {
+                Some(list) => {
+                    match list.state.selected() {
+                        Some(i) => {
+                            let item = list.items.get(i).unwrap();
+
+                            let text = vec![
+                                Spans::from(format!("ID: {}", item.id)),
+                                Spans::from(format!("Path: {}", item.path)),
+                                Spans::from(format!("JSON: {}", if item.has_json { "Yes" } else { "No" })),
+                                Spans::from(format!("JAR: {}", if item.has_jar { "Yes" } else { "No" })),
+                                // Spans::from(format!("Path: {}", item.json_path)),
+                                // Spans::from(format!("Path: {}", item.jar_path)),
+                            ];
+                            let block = Block::default()
+                                .title("Status")
+                                .borders(Borders::ALL);
+                            let paragraph = Paragraph::new(text.clone())
+                                .block(block)
+                                .alignment(Alignment::Left);
+                            f.render_widget(paragraph, status_chunks[0]);
+                        }
+                        None => {
+                            let block = Block::default()
+                                .title("Status")
+                                .borders(Borders::ALL);
+                            f.render_widget(block, status_chunks[0]);
+                        }
+                    }
+                }
+                None => {
+                    let block = Block::default()
+                        .title("Status")
+                        .borders(Borders::ALL);
+                    f.render_widget(block, status_chunks[0]);
+                }
+            }
+        }
         _ => {
             let block = Block::default()
                 .title("Status")
