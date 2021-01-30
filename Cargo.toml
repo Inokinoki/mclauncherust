@@ -18,3 +18,5 @@ tui = { version = "0.14", default-features = false, features = ['crossterm'] }
 
 # for arg parsing
 argh = "0.1.4"
+
+uuid = { version = "0.8", features = ["v4"] }
