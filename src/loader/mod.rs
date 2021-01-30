@@ -30,23 +30,23 @@ impl MinecraftInstance {
     pub fn existing_versions(&self) -> Vec<MinecraftVersion> {
         let mut installed_versions = Vec::new();
 
-        if !self.has_versions() {
-            self.create_versions();
+        if !self.has_versions_dir() {
+            self.create_versions_dir();
         }
 
-        let versions_folder_path: PathBuf = Path::new(&self.base_path).join("versions");
-        {
-            for entry in fs::read_dir(&versions_folder_path).unwrap() {
-                let entry = entry.unwrap();
-                let path = entry.path();
-                if path.is_dir() {
-                    installed_versions.push(MinecraftVersion {
-                        id: path.file_name().unwrap().to_str().unwrap().to_string(),
-                        path: path.to_str().unwrap().to_string(),
-                        has_json: false,
-                        has_jar: false,
-                    });
-                }
+        let versions_dir = self.versions_dir();
+        let versions_folder_path = Path::new(&versions_dir);
+        for entry in fs::read_dir(&versions_folder_path).unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            if path.is_dir() {
+                let version = MinecraftVersion {
+                    id: path.file_name().unwrap().to_str().unwrap().to_string(),
+                    path: path.to_str().unwrap().to_string(),
+                    has_json: false,
+                    has_jar: false,
+                };
+                installed_versions.push(version);
             }
         }
         installed_versions
@@ -70,48 +70,68 @@ impl MinecraftInstance {
 
 
     /* functions to detect dir */
-    fn has_versions(&self) -> bool {
+    fn has_versions_dir(&self) -> bool {
         // TODO
         true
     }
 
-    fn has_assets(&self) -> bool {
+    fn has_assets_dir(&self) -> bool {
         // TODO
         true
     }
 
-    fn has_libraries(&self) -> bool {
+    fn has_libraries_dir(&self) -> bool {
         // TODO
         true
     }
 
-    fn has_mods(&self) -> bool {
+    fn has_mods_dir(&self) -> bool {
         // TODO
         true
     }
 
     /* functions to create dir */
-    fn create_versions(&self) {
+    fn create_versions_dir(&self) {
         // TODO
     }
 
-    fn create_assets(&self) {
+    fn create_assets_dir(&self) {
         // TODO
     }
 
-    fn create_libraries(&self) {
+    fn create_libraries_dir(&self) {
         // TODO
     }
 
-    fn create_mods(&self) {
+    fn create_mods_dir(&self) {
         // TODO
     }
 
     fn create_version_dir(&self, v: &MinecraftVersion) {
-        if !self.has_versions() {
-            self.create_versions();
+        if !self.has_versions_dir() {
+            self.create_versions_dir();
         }
 
         // TODO: create versions/id
+    }
+
+    fn versions_dir(&self) -> String {
+        let versions_path: PathBuf = Path::new(&self.base_path).join("versions");
+        versions_path.to_str().unwrap().to_string()
+    }
+
+    fn assets_dir(&self) -> String {
+        let versions_path: PathBuf = Path::new(&self.base_path).join("assets");
+        versions_path.to_str().unwrap().to_string()
+    }
+
+    fn libraries_dir(&self) -> String {
+        let versions_path: PathBuf = Path::new(&self.base_path).join("libraries");
+        versions_path.to_str().unwrap().to_string()
+    }
+
+    fn mods_dir(&self) -> String {
+        let versions_path: PathBuf = Path::new(&self.base_path).join("mods");
+        versions_path.to_str().unwrap().to_string()
     }
 }
