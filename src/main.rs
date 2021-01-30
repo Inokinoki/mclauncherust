@@ -5,6 +5,7 @@ use std::collections::HashMap;
 // `launcher_config/mod.rs` and will insert its contents inside a module
 // named `launcher_config` under this scope
 mod launcher_config;
+mod args_generator;
 mod download;
 mod tuiapp;
 mod loader;
