@@ -248,7 +248,13 @@ fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                             let block = Block::default()
                                 .title("Status")
                                 .borders(Borders::ALL);
-                            f.render_widget(block, status_chunks[0]);
+                            let text = vec![
+                                Spans::from("Use arrow to select a version"),
+                            ];
+                            let paragraph = Paragraph::new(text.clone())
+                                .block(block)
+                                .alignment(Alignment::Center);
+                            f.render_widget(paragraph, status_chunks[0]);
                         }
                     }
                 }
@@ -287,7 +293,13 @@ fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
                             let block = Block::default()
                                 .title("Status")
                                 .borders(Borders::ALL);
-                            f.render_widget(block, status_chunks[0]);
+                            let text = vec![
+                                Spans::from("Use arrow to select a version"),
+                            ];
+                            let paragraph = Paragraph::new(text.clone())
+                                .block(block)
+                                .alignment(Alignment::Center);
+                            f.render_widget(paragraph, status_chunks[0]);
                         }
                     }
                 }
