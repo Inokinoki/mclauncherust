@@ -10,10 +10,9 @@ mod tuiapp;
 mod loader;
 
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     let mut app = tuiapp::app::TUIApp::new();
-    app.main_loop().await?;
+    app.main_loop();
 
     /*
     let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
@@ -31,7 +30,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .json::<download::assets::MinecraftAssetsJson>()
         .await?;
     */
-    Ok(())
 }
 
 /*fn main() {

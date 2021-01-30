@@ -1,6 +1,9 @@
 use std::path::{ Path, PathBuf };
 use std::{ env, fs };
 
+use crate::launcher_config;
+use crate::download::version_list::MinecraftVersionListJson;
+
 #[derive(Debug)]
 pub struct MinecraftVersion {
     pub id: String,
@@ -93,6 +96,13 @@ impl MinecraftInstance {
         // TODO: Download assets, libraries, etc 
     }
 
+    pub async fn download_manifest(&self) -> Result<MinecraftVersionListJson, Box<dyn std::error::Error>> {
+        let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
+            .await?
+            .json::<MinecraftVersionListJson>()
+            .await?;
+        Ok(resp)
+    }
 
     /* functions to detect dir */
     fn has_versions_dir(&self) -> bool {

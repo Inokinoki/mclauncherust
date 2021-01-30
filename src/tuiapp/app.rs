@@ -160,7 +160,7 @@ impl TUIApp {
         app
     }
     
-    pub async fn main_loop(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn main_loop(&mut self) {
         // Setup input handling
         let (tx, rx) = mpsc::channel();
 
@@ -198,11 +198,14 @@ impl TUIApp {
                         break;
                     }
                     KeyCode::Char('r') => {
-                        let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
-                            .await?
-                            .json::<MinecraftVersionListJson>()
-                            .await?;
-                        self.state.manifest_items = Some(StatefulList::with_items(resp.versions));
+                        // TODO: use fully async way
+                        let mut rt = tokio::runtime::Runtime::new().unwrap();
+                        match rt.block_on(self.state.instance.download_manifest()) {
+                            Ok(manifest) => {
+                                self.state.manifest_items = Some(StatefulList::with_items(manifest.versions));
+                            }
+                            Err(e) => { self.state.manifest_items = None; }
+                        }
                     }
                     KeyCode::Char('s') => {
                         // Start
@@ -304,8 +307,6 @@ impl TUIApp {
                 break;
             }
         }
-
-        Ok(())
     }
 }
 
