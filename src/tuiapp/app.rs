@@ -198,17 +198,27 @@ impl TUIApp {
                         break;
                     }
                     KeyCode::Char('r') => {
-                        // TODO: use fully async way
-                        let mut rt = tokio::runtime::Runtime::new().unwrap();
-                        match rt.block_on(self.state.instance.download_manifest()) {
-                            Ok(manifest) => {
-                                self.state.manifest_items = Some(StatefulList::with_items(manifest.versions));
+                        match self.state.focused {
+                            Focus::ALL_VERSION_LIST => {
+                                // TODO: use fully async way
+                                match self.state.instance.download_manifest() {
+                                    Some(manifest) => {
+                                        self.state.manifest_items = Some(StatefulList::with_items(manifest.versions));
+                                    }
+                                    None => {}
+                                }
                             }
-                            Err(e) => { self.state.manifest_items = None; }
+                            _ => {}
                         }
                     }
                     KeyCode::Char('s') => {
                         // Start
+                        match self.state.focused {
+                            Focus::INSTALLED_VERSION_LIST => {
+                                // Do something to bring the game up
+                            }
+                            _ => {}
+                        }
                     }
                     KeyCode::Char('c') => {
                         // Cancel download

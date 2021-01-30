@@ -6,6 +6,8 @@ use crate::download::version_list::MinecraftVersionListJson;
 
 use tokio::runtime::Runtime;
 
+mod manifest_loader;
+
 #[derive(Debug)]
 pub struct MinecraftVersion {
     pub id: String,
@@ -104,12 +106,14 @@ impl MinecraftInstance {
         // TODO: Download assets, libraries, etc 
     }
 
-    pub async fn download_manifest(&self) -> Result<MinecraftVersionListJson, Box<dyn std::error::Error>> {
-        let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)
-            .await?
-            .json::<MinecraftVersionListJson>()
-            .await?;
-        Ok(resp)
+    pub fn download_manifest(&mut self) -> Option<MinecraftVersionListJson> {
+        let task = manifest_loader::download_manifest_async_impl();
+        match self.runtime.block_on(task) {
+            Ok(manifest) => {
+                Some(manifest)
+            }
+            Err(e) => { None }
+        }
     }
 
     /* functions to detect dir */
