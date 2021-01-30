@@ -104,25 +104,11 @@ impl TUIAppState {
         }
 
         let mut instance = MinecraftInstance::from(path.to_str().unwrap_or_else(|| { "" }));
-        
-        let versions_folder_path: PathBuf = path.join("versions");
-
-        if !versions_folder_path.exists() || !versions_folder_path.is_dir() {
-            return TUIAppState {
-                focused: Focus::INSTALLED_VERSION_LIST,
-                selected_version_id_in_all_list: String::new(),
-                selected_version_id_in_installed_list: String::new(),
-    
-                stateful_items: None,
-                installed_items: None,
-
-                instance: instance,
-            }
-        }
 
         // Load installed versions
         let mut installed_versions = instance.existing_versions();
 
+        let versions_folder_path: PathBuf = path.join("versions");
         let mut manifest_file_path = versions_folder_path;
         manifest_file_path.push("version_manifest_v2.json");
 
