@@ -38,10 +38,20 @@ fn draw_donwload_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
 
 fn draw_info_page<B: Backend>(f: &mut Frame<B>, s: &mut TUIAppState) {
     let size = f.size();
-    let block = Block::default()
-        .title("MC Launcherust - [S]tart [D]ownload [P]rint [R]efresh [Q]uit")
-        .border_type(BorderType::Rounded);
-    f.render_widget(block, size);
+    match s.focused {
+        Focus::ALL_VERSION_LIST => {
+            let block = Block::default().title("MC Launcherust - All Versions - [D]ownload [R]efresh [Q]uit");
+            f.render_widget(block, size);
+        }
+        Focus::INSTALLED_VERSION_LIST => {
+            let block = Block::default().title("MC Launcherust - Installed Versions - [D]ownload [S]tart [Q]uit");
+            f.render_widget(block, size);
+        }
+        _ => {
+            let block = Block::default().title("MC Launcherust - [Q]uit");
+            f.render_widget(block, size);
+        }
+    }
 
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
