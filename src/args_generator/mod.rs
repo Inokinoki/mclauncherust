@@ -58,7 +58,11 @@ impl ArgsGenerator {
         generator
     }
 
-    pub fn try_substitute(&self, value: &str) -> String {
+    pub fn add_env(&mut self, key: &str, value: &str) {
+        self.environment.insert(key.to_string(), value.to_string());
+    }
+
+    fn try_substitute(&self, value: &str) -> String {
         if value.contains("$") {
             let mut new_value = value.to_string();
             let re = Regex::new(r"\$\{([A-Za-z0-9_]+)\}").unwrap();
