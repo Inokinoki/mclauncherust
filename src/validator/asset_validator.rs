@@ -68,13 +68,13 @@ mod tests {
     fn test_asset_validator_all_ok() {
         let asset_list: MinecraftAssetsJson = serde_json::from_str(ASSET_STRING).unwrap();
 
-        assert_eq!(validate_asset("asset_tests", &asset_list), true);
+        assert_eq!(validate_asset("tests/assets", &asset_list), true);
     }
 
     fn test_asset_validator_not_ok() {
         let asset_list: MinecraftAssetsJson = serde_json::from_str(ASSET_NOT_CONTAINED_STRING).unwrap();
 
-        assert_eq!(validate_asset("asset_tests", &asset_list), false);
+        assert_eq!(validate_asset("tests/assets", &asset_list), false);
     }
 
     const ASSET_STRING: &str = r###"{
