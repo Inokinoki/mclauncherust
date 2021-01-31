@@ -99,21 +99,40 @@ impl ArgsGenerator {
                             args_string.push_str(&new_value);
                             args_string.push(' ');
                         }
-                        StringOrMinecraftVersionInfoArgumentsArrayJVMRulesJson::Rules(rule) => {
-                            // TODO: Get rule
+                        StringOrMinecraftVersionInfoArgumentsArrayJVMRulesJson::Rules(rules) => {
+                            // Get and match rules
+                            let mut should_apply = false;
+                            for rule in rules.rules.iter() {
+                                let action = &rule.action;
 
-                            // Get value
-                            match &rule.value {
-                                StringOrList::SimpleString(v) => {
-                                    let new_value = self.try_substitute(v);
-                                    args_string.push_str(&new_value);
-                                    args_string.push(' ');
+                                if action == "allow" {
+                                    let os = &rule.os;
+
+                                    match os {
+                                        Some(r) => {
+                                            if self.match_os_features(r) {
+                                                should_apply = true;
+                                            }
+                                        }
+                                        None => {}
+                                    }
                                 }
-                                StringOrList::StringVector(vs) => {
-                                    for v in vs.iter() {
+                            }
+
+                            if should_apply {
+                                // Get value
+                                match &rules.value {
+                                    StringOrList::SimpleString(v) => {
                                         let new_value = self.try_substitute(v);
                                         args_string.push_str(&new_value);
                                         args_string.push(' ');
+                                    }
+                                    StringOrList::StringVector(vs) => {
+                                        for v in vs.iter() {
+                                            let new_value = self.try_substitute(v);
+                                            args_string.push_str(&new_value);
+                                            args_string.push(' ');
+                                        }
                                     }
                                 }
                             }
@@ -156,6 +175,37 @@ impl ArgsGenerator {
                         } else {
                             false // false and match_all_features -> false
                         };
+                    }
+                }
+            }
+        }
+        match_all_features
+    }
+
+    fn match_os_features(&self, feature: &MinecraftVersionInfoArgumentsArrayRuleOSJson) -> bool {
+        let mut match_all_features = false;
+        match feature {
+            MinecraftVersionInfoArgumentsArrayRuleOSJson::OSWithoutVersion(os) => {
+                // TODO: more validation on OS
+                if self.environment.contains_key("os") {
+                    if self.environment.get("os").unwrap().contains(&os.name) {
+                        match_all_features = true;
+                    }
+                }
+            }
+            MinecraftVersionInfoArgumentsArrayRuleOSJson::OSWithVersion(os) => {
+                // TODO: more validation on OS
+                if self.environment.contains_key("os") && self.environment.contains_key("os_version") {
+                    let os_matched = self.environment.get("os").unwrap().contains(&os.name);
+                    // TODO: more validation on OS version
+                    let os_version_matched = self.environment.get("os_version").unwrap().contains(&os.version);
+                    match_all_features = os_matched && os_version_matched;
+                }
+            }
+            MinecraftVersionInfoArgumentsArrayRuleOSJson::OSWithArch(os) => {
+                if self.environment.contains_key("arch") {
+                    if self.environment.get("arch").unwrap().contains(&os.arch) {
+                        match_all_features = true;
                     }
                 }
             }
