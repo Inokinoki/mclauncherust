@@ -9,6 +9,7 @@ mod args_generator;
 mod download;
 mod tuiapp;
 mod loader;
+mod validator;
 
 
 fn main() {
