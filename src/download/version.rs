@@ -79,7 +79,7 @@ pub struct MinecraftVersionInfoDownloadsJson {
 
 #[derive(Deserialize, Debug)]
 pub struct MinecraftVersionInfoJson {
-    pub arguments: Option<MinecraftVersionInfoArgumentsArrayJson>,
+    pub arguments: Option<MinecraftVersionInfoArgumentsArrayJson>,  // Recent version
     pub assetIndex: MinecraftVersionInfoAssertIndexJson,
     pub assets: String,
     pub downloads: HashMap<String, MinecraftVersionInfoDownloadsFileJson>,
@@ -91,6 +91,8 @@ pub struct MinecraftVersionInfoJson {
     pub releaseTime: String,
     pub time: String,
     pub r#type: String,
+
+    pub minecraftArguments: Option<String>, // Patch for version 18 or higher
 }
 
 
