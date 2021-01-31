@@ -1,8 +1,8 @@
-# [WIP] MC Launcherust
+# [WIP] Minecheruster (Manchester)
 
 ![Rust build](https://github.com/Inokinoki/mclauncherust/workflows/Rust/badge.svg)
 
-An MC Launcher written in Rust (based on TUI).
+A basic Minecraft Launcher with Terminal UI, written in Rust, based on Tokio (Tokyo).
 
 ## Preview
 
@@ -16,3 +16,5 @@ An MC Launcher written in Rust (based on TUI).
 - [ ] Generate startup args
 - [ ] User login
 - [ ] Mod
+
+![A WTF T-shirt showing Manchester, Moscow and Tokyo](https://www.tshirtsunited.com/image/cache/catalog/designslarge/m/manchester-moscow-tokyo-tshirt_2_blacktshirt-1000x1000.jpg)
