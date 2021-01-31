@@ -10,6 +10,7 @@ mod download;
 mod tuiapp;
 mod loader;
 mod validator;
+mod launcher;
 
 
 fn main() {
