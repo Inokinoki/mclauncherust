@@ -44,21 +44,35 @@ impl ArgsGenerator {
                             args_string.push_str(&new_value);
                             args_string.push(' ');
                         }
-                        StringOrMinecraftVersionInfoArgumentsArrayGameRulesJson::Rules(rule) => {
-                            // TODO: Get rule
+                        StringOrMinecraftVersionInfoArgumentsArrayGameRulesJson::Rules(rules) => {
+                            // Get and match rules
+                            let mut should_apply = false;
+                            for rule in rules.rules.iter() {
+                                let action = &rule.action;
 
-                            // Get value
-                            match &rule.value {
-                                StringOrList::SimpleString(v) => {
-                                    let new_value = self.try_substitute(v);
-                                    args_string.push_str(&new_value);
-                                    args_string.push(' ');
+                                if action == "allow" {
+                                    let features = &rule.features;
+                                    
+                                    if self.match_bool_features(features) {
+                                        should_apply = true;
+                                    }
                                 }
-                                StringOrList::StringVector(vs) => {
-                                    for v in vs.iter() {
+                            }
+
+                            if should_apply {
+                                // Get value and append it
+                                match &rules.value {
+                                    StringOrList::SimpleString(v) => {
                                         let new_value = self.try_substitute(v);
                                         args_string.push_str(&new_value);
                                         args_string.push(' ');
+                                    }
+                                    StringOrList::StringVector(vs) => {
+                                        for v in vs.iter() {
+                                            let new_value = self.try_substitute(v);
+                                            args_string.push_str(&new_value);
+                                            args_string.push(' ');
+                                        }
                                     }
                                 }
                             }
@@ -112,6 +126,41 @@ impl ArgsGenerator {
                 String::new()
             }
         }
+    }
+
+    fn match_bool_features(&self, features: &HashMap<String, bool>) -> bool {
+        let mut match_all_features = true;
+        for (feature, value) in features.iter() {
+            match value {
+                false => {
+                    // True when feature not included or feature value false
+                    if !self.environment.contains_key(feature) {
+                        match_all_features = match_all_features;    // true and match_all_features -> match_all_features
+                    } else {
+                        let value_in_map = self.environment.get(feature).unwrap();
+                        match_all_features = if value_in_map == "false" {
+                            match_all_features  // true and match_all_features -> match_all_features
+                        } else {
+                            false // false and match_all_features -> false
+                        };
+                    }
+                }
+                true => {
+                    // True when feature included and feature value true
+                    if !self.environment.contains_key(feature) {
+                        match_all_features = false;    // false and match_all_features -> false
+                    } else {
+                        let value_in_map = self.environment.get(feature).unwrap();
+                        match_all_features = if value_in_map == "true" {
+                            match_all_features  // true and match_all_features -> match_all_features
+                        } else {
+                            false // false and match_all_features -> false
+                        };
+                    }
+                }
+            }
+        }
+        match_all_features
     }
 }
 
