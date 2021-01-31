@@ -17,4 +17,8 @@ A basic Minecraft Launcher with Terminal UI, written in Rust, based on Tokio (To
 - [ ] User login
 - [ ] Mod
 
+## WTF
+
+A WTF T-shirt showing Manchester, Moscow and Tokyo:
+
 ![A WTF T-shirt showing Manchester, Moscow and Tokyo](https://www.tshirtsunited.com/image/cache/catalog/designslarge/m/manchester-moscow-tokyo-tshirt_2_blacktshirt-1000x1000.jpg)
