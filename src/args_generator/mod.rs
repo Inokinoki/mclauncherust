@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use regex::Regex;
 
 use crate::download::version::*;
 
@@ -13,6 +14,24 @@ impl ArgsGenerator {
         }
     }
 
+    pub fn try_substitute(&self, value: &str) -> String {
+        if value.contains("$") {
+            let mut new_value = value.to_string();
+            let re = Regex::new(r"\$\{([A-Za-z0-9_]+)\}").unwrap();
+            
+            for cap in re.captures_iter(value) {
+                if self.environment.contains_key(&cap[1]) {
+                    new_value = new_value.replace(&cap[0], self.environment.get(&cap[1]).unwrap());
+                } else {
+                    new_value = new_value.replace(&cap[0], "\"\"");
+                }
+            }
+            new_value
+        } else {
+            value.to_string()
+        }
+    }
+
     pub fn generate_game_string(&self, version_info: &MinecraftVersionInfoJson) -> String {
         match &version_info.arguments {
             Some(args) => {
@@ -21,7 +40,8 @@ impl ArgsGenerator {
                 for arg in game_args.iter() {
                     match arg {
                         StringOrMinecraftVersionInfoArgumentsArrayGameRulesJson::SimpleString(s) => {
-                            args_string.push_str(s);
+                            let new_value = self.try_substitute(s);
+                            args_string.push_str(&new_value);
                             args_string.push(' ');
                         }
                         StringOrMinecraftVersionInfoArgumentsArrayGameRulesJson::Rules(rule) => {
@@ -30,12 +50,14 @@ impl ArgsGenerator {
                             // Get value
                             match &rule.value {
                                 StringOrList::SimpleString(v) => {
-                                    args_string.push_str(&v);
+                                    let new_value = self.try_substitute(v);
+                                    args_string.push_str(&new_value);
                                     args_string.push(' ');
                                 }
                                 StringOrList::StringVector(vs) => {
                                     for v in vs.iter() {
-                                        args_string.push_str(&v);
+                                        let new_value = self.try_substitute(v);
+                                        args_string.push_str(&new_value);
                                         args_string.push(' ');
                                     }
                                 }
@@ -59,7 +81,8 @@ impl ArgsGenerator {
                 for arg in jvm_args.iter() {
                     match arg {
                         StringOrMinecraftVersionInfoArgumentsArrayJVMRulesJson::SimpleString(s) => {
-                            args_string.push_str(&s);
+                            let new_value = self.try_substitute(s);
+                            args_string.push_str(&new_value);
                             args_string.push(' ');
                         }
                         StringOrMinecraftVersionInfoArgumentsArrayJVMRulesJson::Rules(rule) => {
@@ -68,12 +91,14 @@ impl ArgsGenerator {
                             // Get value
                             match &rule.value {
                                 StringOrList::SimpleString(v) => {
-                                    args_string.push_str(&v);
+                                    let new_value = self.try_substitute(v);
+                                    args_string.push_str(&new_value);
                                     args_string.push(' ');
                                 }
                                 StringOrList::StringVector(vs) => {
                                     for v in vs.iter() {
-                                        args_string.push_str(&v);
+                                        let new_value = self.try_substitute(v);
+                                        args_string.push_str(&new_value);
                                         args_string.push(' ');
                                     }
                                 }
