@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 use regex::Regex;
+use std::env;
+
+use os_info;
 
 use crate::download::version::*;
 
@@ -8,10 +11,51 @@ pub struct ArgsGenerator {
 }
 
 impl ArgsGenerator {
+    #[cfg(target_os = "linux")]
+    fn add_os_info(&mut self) {
+        let info = os_info::get();
+        self.environment.insert("os".to_string(), "linux".to_string());
+        self.environment.insert("os_version".to_string(), info.version().to_string());
+    }
+    
+    #[cfg(target_os = "macos")]
+    fn add_os_info(&mut self) {
+        let info = os_info::get();
+        self.environment.insert("os".to_string(), "osx".to_string());
+        self.environment.insert("os_version".to_string(), info.version().to_string());
+    }
+    
+    #[cfg(target_os = "windows")]
+    fn add_os_info(&mut self) {
+        let info = os_info::get();
+        self.environment.insert("os".to_string(), "windows".to_string());
+        self.environment.insert("os_version".to_string(), info.version().to_string());
+    }
+    
+    #[cfg(not(any(
+        target_os = "linux",
+        target_os = "macos",
+        target_os = "windows"
+    )))]
+    fn add_os_info(&mut self) {
+        self.environment.insert("os".to_string(), "unknown".to_string());
+        self.environment.insert("os_version".to_string(), "unknown".to_string());
+    }
+
     pub fn new() -> ArgsGenerator {
-        ArgsGenerator {
-            environment: HashMap::new(),
+        let mut map: HashMap<String, String> = HashMap::new();
+        if std::env::consts::ARCH == "x86_64" {
+            map.insert("arch".to_string(), "x86".to_string());
+        } else {
+            map.insert("arch".to_string(), std::env::consts::ARCH.to_string());
         }
+        map.insert("arch_complete".to_string(), std::env::consts::ARCH.to_string());
+        let mut generator = ArgsGenerator {
+            environment: map,
+        };
+        generator.add_os_info();
+
+        generator
     }
 
     pub fn try_substitute(&self, value: &str) -> String {
@@ -232,6 +276,44 @@ mod tests {
         generator.generate_game_string(&version_info);
 
         generator.generate_jvm_string(&version_info);
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn test_args_generator_official_under_windows() {
+        let version_info: crate::download::version::MinecraftVersionInfoJson
+            = serde_json::from_str(VERSION_INFO_TEST_JSON).unwrap();
+
+        assert_eq!(version_info.id, "1.16.2-rc1");
+        assert_eq!(version_info.mainClass, "net.minecraft.client.main.Main");
+        assert_eq!(version_info.assets, "1.16");
+
+        // TODO: Test under environment
+        let generator = ArgsGenerator::new();
+        generator.generate_game_string(&version_info);
+
+        let jvm_args = generator.generate_jvm_string(&version_info);
+        assert_eq!(jvm_args.contains("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"), true);
+        assert_eq!(jvm_args.contains("-XstartOnFirstThread"), false);
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn test_args_generator_official_under_macos() {
+        let version_info: crate::download::version::MinecraftVersionInfoJson
+            = serde_json::from_str(VERSION_INFO_TEST_JSON).unwrap();
+
+        assert_eq!(version_info.id, "1.16.2-rc1");
+        assert_eq!(version_info.mainClass, "net.minecraft.client.main.Main");
+        assert_eq!(version_info.assets, "1.16");
+
+        // TODO: Test under environment
+        let generator = ArgsGenerator::new();
+        generator.generate_game_string(&version_info);
+
+        let jvm_args = generator.generate_jvm_string(&version_info);
+        assert_eq!(jvm_args.contains("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"), false);
+        assert_eq!(jvm_args.contains("-XstartOnFirstThread"), true);
     }
 
     const VERSION_INFO_TEST_JSON: &str =

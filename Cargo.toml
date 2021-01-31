@@ -22,3 +22,5 @@ argh = "0.1.4"
 uuid = { version = "0.8", features = ["v4"] }
 
 regex = "1"
+
+os_info = "3.0"
