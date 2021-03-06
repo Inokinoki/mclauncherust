@@ -2,8 +2,12 @@
 use crate::args_generator::ArgsGenerator;
 use crate::download::version::MinecraftVersionInfoJson;
 
-struct Launcher {
+use which::which;
+use std::path::{ Path, PathBuf };
+
+pub struct Launcher {
     args_generator: ArgsGenerator,
+    java_path: Option<PathBuf>,
 
     // TODO: auth
     // TODO: validator ?
@@ -26,8 +30,14 @@ impl Launcher {
 
         generator.add_env("path", "");                          // TODO: get from instance -Dlog4j.configurationFile
 
+        let java_path = which::which("java");
+
         Launcher {
             args_generator: generator,
+            java_path: match java_path {
+                Ok(path) => Some(path),
+                Err(e) => None,
+            },
         }
     }
 

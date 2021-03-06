@@ -28,3 +28,5 @@ os_info = "3.0"
 # Crytpo
 sha-1 = "0.9"
 hex = "0.4.2"
+
+which = "4.0.2"
