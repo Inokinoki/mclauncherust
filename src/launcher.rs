@@ -12,6 +12,7 @@ pub struct Launcher {
     args_generator: ArgsGenerator,
     java_path: Option<PathBuf>,
     app: TUIApp,
+    args: Option<String>,
 
     // TODO: auth
     // TODO: validator ?
@@ -43,6 +44,7 @@ impl Launcher {
                 Err(e) => None,
             },
             app: app,
+            args: None,
         }
     }
 
@@ -56,6 +58,12 @@ impl Launcher {
         self.args_generator.add_env("version_type", &version.r#type);           // --versionType
 
         // TODO: mainClass ?
+        self.args_generator.add_env("", &version.mainClass);
+
+        self.args = Some(format!("{} {}",
+            self.args_generator.generate_jvm_string(&version),
+            self.args_generator.generate_game_string(&version)
+        ));
     }
 
     /* 
@@ -72,12 +80,33 @@ impl Launcher {
                 return true;
             },
             None => {
-                return true;
+                return false;
             },
         }
         false
     }
 
     pub fn launch(&self) {
+        match &self.args {
+            Some(args) => {
+                let java_path;
+                match &self.java_path {
+                    Some(path) => {
+                        java_path = String::from(path.to_str().unwrap());
+                    }
+                    _ => {
+                        // Default fallback
+                        java_path = "java".to_string();
+                    }
+                }
+                Command::new(java_path)
+                    .args(args.split(' '))
+                    .spawn()
+                    .expect("Minecraft failed to start");
+            },
+            None => {
+                // TODO: Show an error
+            }
+        }
     }
 }
