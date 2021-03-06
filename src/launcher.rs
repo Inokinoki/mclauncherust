@@ -2,12 +2,16 @@
 use crate::args_generator::ArgsGenerator;
 use crate::download::version::MinecraftVersionInfoJson;
 
+use crate::tuiapp::TUIApp;
+
 use which::which;
+use std::process::Command;
 use std::path::{ Path, PathBuf };
 
 pub struct Launcher {
     args_generator: ArgsGenerator,
     java_path: Option<PathBuf>,
+    app: TUIApp,
 
     // TODO: auth
     // TODO: validator ?
@@ -15,7 +19,7 @@ pub struct Launcher {
 }
 
 impl Launcher {
-    pub fn new() -> Launcher {
+    pub fn new(app: TUIApp) -> Launcher {
         let mut generator = ArgsGenerator::new();
         generator.add_env("user_type", "mojang");               // --userType
 
@@ -38,11 +42,12 @@ impl Launcher {
                 Ok(path) => Some(path),
                 Err(e) => None,
             },
+            app: app,
         }
     }
 
     // Load a version
-    pub fn load(&mut self, version: &mut MinecraftVersionInfoJson) {
+    pub fn load(&mut self, version: &MinecraftVersionInfoJson) {
         self.args_generator.add_env("auth_player_name", "Inokinoki");           // TODO: get from auth info --username        
         self.args_generator.add_env("auth_uuid", "Inokinoki");                  // --uuid
         self.args_generator.add_env("auth_access_token", "Inokinoki");          // --accessToken
@@ -58,4 +63,21 @@ impl Launcher {
         - resolution_width
         - resolution_height
     */
+
+    pub fn configure(&mut self) -> bool {
+        let version = self.app.main_loop();
+        match version {
+            Some(v) => {
+                self.load(&v);
+                return true;
+            },
+            None => {
+                return true;
+            },
+        }
+        false
+    }
+
+    pub fn launch(&self) {
+    }
 }

@@ -1,6 +1,8 @@
 
-pub mod app;
-pub mod ui;
+mod app;
+mod ui;
+
+pub use app::TUIApp;
 
 #[derive(Debug)]
 pub enum Focus {

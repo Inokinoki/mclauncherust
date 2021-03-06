@@ -14,8 +14,11 @@ mod launcher;
 
 
 fn main() {
-    let mut app = tuiapp::app::TUIApp::new();
-    app.main_loop();
+    let mut app = tuiapp::TUIApp::new();
+    let mut launcher = launcher::Launcher::new(app);
+    if launcher.configure() {
+        launcher.launch();
+    }
 
     /*
     let resp = reqwest::get(launcher_config::URL_JSON_VERSION_LIST_INOKI)

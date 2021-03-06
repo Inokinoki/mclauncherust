@@ -25,6 +25,7 @@ use crate::tuiapp::ui;
 
 use crate::launcher_config;
 use crate::download::version_list::{ MinecraftVersionListJson, MinecraftVersionJson };
+use crate::download::version::MinecraftVersionInfoJson;
 
 use crate::tuiapp::{ Focus };
 
@@ -152,7 +153,7 @@ impl TUIApp {
             cli: argh::from_env(),
             terminal: Terminal::new(backend).unwrap(),
 
-            state: TUIAppState::create_with_mc_path(Path::new("C:\\Users\\veyxs\\AppData\\Roaming\\.minecraft")),
+            state: TUIAppState::create_with_mc_path(Path::new("/Users/inoki/Library/Application Support/minecraft")),
             // state: TUIAppState::new(),
 
             should_quit: false,
@@ -160,7 +161,7 @@ impl TUIApp {
         app
     }
     
-    pub fn main_loop(&mut self) {
+    pub fn main_loop(&mut self) -> Option<MinecraftVersionInfoJson> {
         // Setup input handling
         let (tx, rx) = mpsc::channel();
 
@@ -317,6 +318,7 @@ impl TUIApp {
                 break;
             }
         }
+        None
     }
 }
 
