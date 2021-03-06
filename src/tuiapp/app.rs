@@ -217,6 +217,23 @@ impl TUIApp {
                         match self.state.focused {
                             Focus::INSTALLED_VERSION_LIST => {
                                 // Do something to bring the game up
+                                let state = &self.state;
+                                let installed_items = &state.installed_items;
+                                match installed_items {
+                                    Some(items) => {
+                                        match items.state.selected() {
+                                            Some(index) => {
+                                                let item = &items.items[index];
+
+                                                // TODO: validate version completeness
+
+                                                return self.state.instance.get_version(item);
+                                            }
+                                            _ => {}
+                                        }
+                                    },
+                                    _ => {}
+                                }
                             }
                             _ => {}
                         }

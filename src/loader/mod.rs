@@ -3,6 +3,7 @@ use std::{ env, fs };
 
 use crate::launcher_config;
 use crate::download::version_list::MinecraftVersionListJson;
+use crate::download::version::MinecraftVersionInfoJson;
 
 use tokio::runtime::Runtime;
 
@@ -42,6 +43,26 @@ impl MinecraftInstance {
             runtime: Runtime::new().unwrap(),
         }
     }
+
+    pub fn get_version(&self, version: &MinecraftVersion) -> Option<MinecraftVersionInfoJson> {
+        if version.has_jar && version.has_json {
+            let mut json_file_path = PathBuf::from(&version.path);
+            json_file_path.push(format!("{}.json", version.id));
+
+            let version_json_str = fs::read_to_string(json_file_path);
+
+            match version_json_str {
+                Ok(v) => {
+                    let version_info: MinecraftVersionInfoJson
+                        = serde_json::from_str(&v).unwrap();
+                    return Some(version_info);
+                }
+                _ => {}
+            }
+        }
+        // TODO: add more error handling
+        None
+    } 
 
     pub fn existing_versions(&self) -> Vec<MinecraftVersion> {
         let mut installed_versions = Vec::new();
